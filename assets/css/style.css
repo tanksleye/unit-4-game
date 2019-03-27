@@ -1,0 +1,30 @@
+body {
+    background-image: url("gembg.jpg");
+    background-repeat: no-repeat;
+}
+
+
+#colOne {
+    background-color: blue;
+    color: beige;
+}
+
+.container {
+    background-color: black;
+}
+
+.gems {
+    margin: 10px 15px;
+  
+}
+
+#randomNumber {
+    background-color: chartreuse;
+    color: black;
+}
+
+#winsLoses {
+    background-color: salmon;
+    color:  black;
+}
+

@@ -1,0 +1,542 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+    <meta name="author" content="Kennedy Owen">
+	<meta name="description" content="Web Page for Kennedy Owen's CSC572 Final Project">
+	<meta name="keywords" content="sample, webpage, html5">
+	<meta name="generator" content="Notepad++"> 
+    <title>Wang Tile Tesselation with HTML5 & JavaScript based on Image Quilting - CSC 572 S12</title>
+    
+    <style type="text/css">
+	body { background-color: #CCCCCC }
+	</style>
+</head>
+<body>
+<h1>Wang Tile Tesselation based on Image Quilting</h1>
+<h3><i>By Kennedy Owen</i></h3>
+<br><br>
+<h2>Table of Contents</h2>
+<a href="#summary">Summary</a>
+<br>
+<a href="#rationale">Rationale</a>
+<br>
+<a href="#game">Game Implementation</a>
+<br>
+<a href="#terminology">Terminology</a>
+<br>
+<a href="#algorithm">Algorithm</a>
+<br>
+<a href="#results">Results</a>
+<br>
+<a href="#refs">References</a>
+<br><br><br>
+<h2 id="summary">Summary</h2>
+This project implements the Wang Tile tesselation algorithm. Given a set of Wang tiles formed from a quilted image, the tiles are placed aperiodically to form a background for a simple 3-match game implemented with HTML5, CSS and JavaScript using DOM development. The game is called Jewel Warrior, and is derived from Jacob Seidelin's book <a href="http://www.wiley.com/WileyCDA/WileyTitle/productCd-1119975085,descCd-buy.html">HTML5 Games: Creating Fun with HTML5, CSS3, and WebGL</a>.
+
+<br><br>
+
+<h2 id="rationale">Rationale</h2>
+So, why a game? The author is very interested in game development and wanted to learn how to create HTML5 games using CSS and JavaScript. Incorporating image texturing into the game was a way to integrate computer graphics into the process of learning game development for the web.
+<br>
+Part of the project was to incorporate image quilting translation to Wang tile creation. Unfortunately, due to time constraints only the tiling portion was implemented, and thus tiles are required input. The image quilts and Wang tiles are generated using <a href="http://robburke.net/mle/wang/">Robert Burke's C# implementation</a>.
+
+<br><br>
+
+<h2 id="game">Game Implementation</h2>
+The game implementation with Wang tile backgrounds can be found and played <a href="game/index.html" target="_blank">here</a>. It is set to a particular tile scheme and tiles according to the algorithm described below, but can be changed in <b>scripts/game.js</b> to tile with a different scheme as well as tiling randomly (look for commented out lines of code).
+<b>Note:</b> Make sure to play this game hosted online. If you play it locally (URL starts with <i>file://</i> in the browser), the game will not work due to the way the game saving and loading works. A permanent hosted version of the game can be found <a href="http://users.csc.calpoly.edu/~kowen/csc572/final/game/">here</a>.
+<br><br>
+
+<h2 id="terminology">Terminology</h2>
+Note: Please see the reference papers <a href="#refs">listed below</a> for more detail and image examples of the following terms.
+<br>
+<h3>Image quilting</h3>
+<b>Image quilting</b> is the process of acquiring samples from a basic image. Patch samples of a base image are compared side-by-side. A boundary cut is made inside the overlap of the two samples and stitched together based on specified color matching at any given pixel in the overlap. This process is repeated until enough patches are stitched together to form a natural quilt-like texture.
+<br>
+<h3>2. Wang tiles</h3>
+<b>Wang tiles</b> or <b>Wang dominoes</b> are a property that consists of special labels to each of the 4 edges in a square image. They are used to create realistic-looking automatic, aperiodic texture backgrounds through the matching of edges on adjacent tiles. The idea behind matching two edges in adjacent tiles is that the image formed by those two tiles will look more realistic and natural, rather than choppy or full of seams. This <i>seamless</i> tiling provides a mechanism for forming endlessly large textures composed of few tiles drawn at the appropriate matching locations.
+<br>
+Wang tiles can be generated from quilted images. The process involves taking four sample diamond-shaped subimages from a quilted image, for each Wang tile to create. The four subimages are compared and stitched together in an "X" pattern to form a larger diamond-shaped image. A Wang tile is cut from a square formed by connecting the middle of each edge of the larger diamond image. It is not uncommon for the "X" pattern to be decently visible in any given resulting Wang tile. Below is an example of a set of 12 Wang tiles produced with this technique, from a quilt generated from a given patch (see the patch and quilt image <a href="#results">here</a>):
+<br><br>
+<table>
+<tr>
+<td><img src="images/flowertile0.bmp"></td>
+<td><img src="images/flowertile1.bmp"></td>
+<td><img src="images/flowertile2.bmp"></td>
+<td><img src="images/flowertile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/flowertile4.bmp"></td>
+<td><img src="images/flowertile5.bmp"></td>
+<td><img src="images/flowertile6.bmp"></td>
+<td><img src="images/flowertile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/flowertile8.bmp"></td>
+<td><img src="images/flowertile9.bmp"></td>
+<td><img src="images/flowertile10.bmp"></td>
+<td><img src="images/flowertile11.bmp"></td>
+</tr>
+</table>
+<br><br>
+
+<h2 id="algorithm">Algorithm</h2>
+The Wang tiles algorithm consists of two phases: edge labeling and edge matching. This implementation uses 12 Wang tiles. For each tile, the four edges are labeled using four indices (e.g., the north edge could be 0, the east edge 3, the south edge 1 and the west edge 0). The labeling used for this implementation is as follows:
+<pre>
+Tile #   NESW
+-------------
+Tile 1:  0312
+Tile 2:  1302
+Tile 3:  0203
+Tile 4:  1013
+Tile 5:  0310
+Tile 6:  1200
+Tile 7:  0012
+Tile 8:  0002
+Tile 9:  1003
+Tile 10: 0213
+Tile 11: 1210
+Tile 12: 1300
+</pre>
+
+The edge matching algorithm stores tile numbers (referred to as <i>indices</i>) into an array that represents which tile is drawn at any particular place in the image. It uses a class that represents the four labels of a given tile to compare the tiles based on the indices chosen. The algorithm is as follows:
+<br><br>
+<i>
+1. Select a random index for the first tile spot in the first row, and store it in the index array.
+<br><br>
+2. Select a random index for the second tile spot in the first row. Compare the east label of the first tile in the row, to the west label of the second tile in the row. If they do not match, select a new random index for the second tile spot in the first row and compare again. When a match is found, the index is stored in the index array.
+<br><br>
+3. Repeat step 2 to tile the entire row, comparing the east labels of tile (x - 1) in the row, to the west labels of tile (x) in the row.
+<br><br>
+4. Select a random index for the first tile spot in the second row. Compare the south label of the first tile in the first row, to the north label of the first tile in the second row. If they do not match, select a new random index for the first tile spot in the second row and compare again. When a match is found, the index is stored in the index array.
+<br><br>
+5. Select a random index for the second tile spot in the second row. Compare the following:
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a. The south label of the second tile in the first row, to the north label of the second tile in the second row.
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b. The east label of the first tile in the second row, to the west label of the second tile in the second row.
+<br>
+If both do not match, select a new random index for the second tile spot in the second row and compare again. When a match is found, the index is stored in the index array.
+<br><br>
+6. Repeat steps 4 and 5 for additional rows, comparing the following for a given tile (x, y) in any given row:
+<br>
+<b>First tile in the row:</b>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a. The south label of tile (x, y - 1), to the north label of tile (x, y).
+<br>
+<b>Any other tile in the row:</b>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a. The south label of tile (x, y - 1), to the north label of tile (x, y).
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b. The east label of tile (x - 1, y), to the west label of tile (x, y).
+</i>
+<br><br>
+NOTE: Additionally, for each tile spot in the texture, the algorithm prevents the adjacency of tiles chosen for the spot that are exactly the same as the tile(s) it is compared against.
+
+<br><br>
+
+<h2 id="results">Results</h2>
+<i>Brace for many pictures and explanations!</i>
+<br><br>
+The first step is to produce image quilts from a sample patch. Below is a sample patch (left) used to create a larger image quilt (right):
+<br><br>
+<table style="text-align: center; width:100%; margin-left: auto; margin-right: auto">
+<tr>
+<td><img style="width: 100px; height: 100px" src="images/flowerpatch.bmp"></td>
+<td><img style="width: 512px; height: 512px" src="images/flowerquilt.bmp"></td>
+</tr>
+</table>
+<br><br>
+The second step is to produce Wang tiles from the quilted image. Below is the set of 12 Wang tiles produced from stitching together four diamond samples and then cutting out Wang tiles from those shapes:
+<br><br>
+<table style="margin-left: auto; margin-right: auto">
+<tr>
+<td><img src="images/flowertile0.bmp"></td>
+<td><img src="images/flowertile1.bmp"></td>
+<td><img src="images/flowertile2.bmp"></td>
+<td><img src="images/flowertile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/flowertile4.bmp"></td>
+<td><img src="images/flowertile5.bmp"></td>
+<td><img src="images/flowertile6.bmp"></td>
+<td><img src="images/flowertile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/flowertile8.bmp"></td>
+<td><img src="images/flowertile9.bmp"></td>
+<td><img src="images/flowertile10.bmp"></td>
+<td><img src="images/flowertile11.bmp"></td>
+</tr>
+</table>
+<br><br>
+Note that the image quilting program I used to generate the quilts creates artifacts around the edges of the quilt, but this is sidestepped using the Wang tiler from the same source.
+<br><br>
+The final step is to tile the Wang tiles to create as large an image texture as desired. Below is the final result in the game, which tiles with 15 rows and 10 columns with each Wang tile being 32 pixels x 32 pixels:
+<br><br>
+<table style="text-align: center; width:100%; margin-left: auto; margin-right: auto">
+<tr>
+<th colspan="2">Note that each time the game is loaded, the texture tiling is different due to pseudo-random tile selection.</th>
+</tr>
+<tr>
+<td><img src="images/game_flowerbg.png"></td>
+<td><img src="images/game_flowerbg2.png"></td>
+</tr>
+</table>
+<br><br>
+Of course, a comparison between absolute random tile selection and Wang tile selection is inevitable, as seen below:
+<br><br>
+<table style="text-align: center; width:100%; margin-left: auto; margin-right: auto">
+<tr>
+<th colspan="2">Ick. The fully randomized tile background is terrible, choppy, full of seams and just plain unappealing. Then again, the Wang tiles were designed specifically for Wang tile tesselation, and at least some of the tiles match up occasionally. Imagine how awful a texture with totally random tile samples (not Wang tiles cut from image stitching) would look like...</th>
+</tr>
+<tr>
+<td><img src="images/game_flowerbg2.png"></td>
+<td><img src="images/game_flowerbgrand.png"></td>
+</tr>
+</table>
+<br><br>
+<h3>Other examples aside from flowers follow.</h3>
+<br><br>
+<b>Gems</b> (definitely more fitting than flowers for a game called Jewel Warrior)
+<br><br>
+<table>
+<tr>
+<td>Original image:</td>
+<td><img style="width: 400px; height: 300px" src="images/gems.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Patch:</td>
+<td><img src="images/gemspatch.bmp"></td>
+</tr>
+<tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Quilt:</td>
+<td><img src="images/gemsquilt.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles:</td>
+<td><img src="images/gemtile0.bmp"></td>
+<td><img src="images/gemtile1.bmp"></td>
+<td><img src="images/gemtile2.bmp"></td>
+<td><img src="images/gemtile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/gemtile4.bmp"></td>
+<td><img src="images/gemtile5.bmp"></td>
+<td><img src="images/gemtile6.bmp"></td>
+<td><img src="images/gemtile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/gemtile8.bmp"></td>
+<td><img src="images/gemtile9.bmp"></td>
+<td><img src="images/gemtile10.bmp"></td>
+<td><img src="images/gemtile11.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Final result:</td>
+</tr>
+<tr>
+<td><img src="images/game_gemsbg.png"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>The program samples lots of blue for the Wang tiles. Unfortunately, the resulting pattern makes the game's blue jewels difficult to see.</td>
+</tr>
+<tr>
+<td><img src="images/game_gemsbgplay.png"></td>
+</tr>
+</table>
+<br><br>
+<br><br>
+<b>Cyberworld</b>
+<br><br>
+<table>
+<tr>
+<td>Original image:</td>
+<td><img style="width: 640px; height: 480px" src="images/cyberworld.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Patch:</td>
+<td><img src="images/cyberworldpatch.bmp"></td>
+</tr>
+<tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Quilt:</td>
+<td><img src="images/cyberworldquilt.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles:</td>
+<td><img src="images/cyberworldtile0.bmp"></td>
+<td><img src="images/cyberworldtile1.bmp"></td>
+<td><img src="images/cyberworldtile2.bmp"></td>
+<td><img src="images/cyberworldtile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cyberworldtile4.bmp"></td>
+<td><img src="images/cyberworldtile5.bmp"></td>
+<td><img src="images/cyberworldtile6.bmp"></td>
+<td><img src="images/cyberworldtile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cyberworldtile8.bmp"></td>
+<td><img src="images/cyberworldtile9.bmp"></td>
+<td><img src="images/cyberworldtile10.bmp"></td>
+<td><img src="images/cyberworldtile11.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Final result:</td>
+</tr>
+<tr>
+<td><img src="images/game_cyberworldbg.png"></td>
+</tr>
+</table>
+<br><br><br><br>
+<b>Cyber</b> (interesting fact about this one: two applications of quilting created a more aesthetically pleasing set of Wang tiles than the first application of quilting)
+<br><br>
+<table>
+<tr>
+<td>Original image:</td>
+<td><img style="width: 600px; height: 487.5px" src="images/cyber.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>First patch and quilted image:</td>
+</tr>
+<tr>
+<td><img style="width: 150px; height: 150px" src="images/cyberpatch.bmp"></td>
+<td><img src="images/cyberquilt.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles (bad)</td>
+<td><img src="images/cybertile0.bmp"></td>
+<td><img src="images/cybertile1.bmp"></td>
+<td><img src="images/cybertile2.bmp"></td>
+<td><img src="images/cybertile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cybertile4.bmp"></td>
+<td><img src="images/cybertile5.bmp"></td>
+<td><img src="images/cybertile6.bmp"></td>
+<td><img src="images/cybertile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cybertile8.bmp"></td>
+<td><img src="images/cybertile9.bmp"></td>
+<td><img src="images/cybertile10.bmp"></td>
+<td><img src="images/cybertile11.bmp"></td>
+</tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Final result (bad):</td>
+</tr>
+<tr>
+<td><img src="images/game_cyberbg.png"></td>
+</tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Second patch (taken from first quilt) and quilted image:</td>
+</tr>
+<tr>
+<td><img src="images/cyberpatch2.bmp"></td>
+<td><img src="images/cyberquilt2.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles (improved)</td>
+<td><img src="images/cybertile_0.bmp"></td>
+<td><img src="images/cybertile_1.bmp"></td>
+<td><img src="images/cybertile_2.bmp"></td>
+<td><img src="images/cybertile_3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cybertile_4.bmp"></td>
+<td><img src="images/cybertile_5.bmp"></td>
+<td><img src="images/cybertile_6.bmp"></td>
+<td><img src="images/cybertile_7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/cybertile_8.bmp"></td>
+<td><img src="images/cybertile_9.bmp"></td>
+<td><img src="images/cybertile_10.bmp"></td>
+<td><img src="images/cybertile_11.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Final result (good):</td>
+</tr>
+<tr>
+<td><img src="images/game_cyber2bg.png"></td>
+</tr>
+</table>
+<br><br>
+<br><br>
+<b>Diamond</b> (You think this would be fitting for the game, right?)
+<br><br>
+<table>
+<tr>
+<td>Original image:</td>
+<td><img src="images/diamond.jpg"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Patch:</td>
+<td><img src="images/diamondpatch.bmp"></td>
+</tr>
+<tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Quilt (looks decent):</td>
+<td><img style="width: 512px; height: 512px" src="images/diamondquilt.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles:</td>
+<td><img src="images/diamondtile0.bmp"></td>
+<td><img src="images/diamondtile1.bmp"></td>
+<td><img src="images/diamondtile2.bmp"></td>
+<td><img src="images/diamondtile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/diamondtile4.bmp"></td>
+<td><img src="images/diamondtile5.bmp"></td>
+<td><img src="images/diamondtile6.bmp"></td>
+<td><img src="images/diamondtile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/diamondtile8.bmp"></td>
+<td><img src="images/diamondtile9.bmp"></td>
+<td><img src="images/diamondtile10.bmp"></td>
+<td><img src="images/diamondtile11.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Final result (looks...not so fantastic):</td>
+</tr>
+<tr>
+<td><img src="images/game_diamondbg.png"></td>
+</tr>
+</table>
+<br><br>
+<br><br>
+<b>Bunny</b> (it wouldn't be computer graphics without the Stanford bunny!)
+<br><br>
+<table>
+<tr>
+<td>Original image:</td>
+<td><img src="images/bunny.bmp"></td>
+</tr>
+<tr>
+</table>
+<br><br>
+<table>
+<tr>
+<td>Patch:</td>
+<td><img src="images/bunnypatch.bmp"></td>
+</tr>
+<tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Quilt:</td>
+<td><img src="images/bunnyquilt.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td rowspan="3">Wang tiles:</td>
+<td><img src="images/bunnytile0.bmp"></td>
+<td><img src="images/bunnytile1.bmp"></td>
+<td><img src="images/bunnytile2.bmp"></td>
+<td><img src="images/bunnytile3.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/bunnytile4.bmp"></td>
+<td><img src="images/bunnytile5.bmp"></td>
+<td><img src="images/bunnytile6.bmp"></td>
+<td><img src="images/bunnytile7.bmp"></td>
+</tr>
+<tr>
+<td><img src="images/bunnytile8.bmp"></td>
+<td><img src="images/bunnytile9.bmp"></td>
+<td><img src="images/bunnytile10.bmp"></td>
+<td><img src="images/bunnytile11.bmp"></td>
+</tr>
+</table>
+<br>
+<table>
+<tr>
+<td>Final result (looks surprisingly decent...maybe):</td>
+</tr>
+<tr>
+<td><img src="images/game_bunnybg.png"></td>
+</tr>
+</table>
+<br><br>
+<br><br><br>
+<h2 id="refs">Papers & References</h2>
+<ul>
+	<li><a href="http://shell.cas.usf.edu/~jonoska/kursevi/biomol-comp/Wang_Tiles_Paper.pdf">Wang Tiles And Its Applications</a> by M. Schulze</li>
+	<li><a href="http://research.microsoft.com/en-us/um/people/cohen/WangFinal.pdf">Wang Tiles for Image and Texture Generation</a> by M. Cohen, J. Shade et al</li>
+	<li><a href="http://www.eecs.berkeley.edu/Research/Projects/CS/vision/papers/efros-siggraph01.pdf">Image Quilting for Texture Synthesis and Transfer</a> by A. Efros and W. Freeman</li>
+	<br>
+	<li><a href="http://robburke.net/mle/wang/">Image Quilting, Wang Tiling, and Texture Transfer</a> by Robert Burke</li>
+	<li><a href="http://www.wiley.com/WileyCDA/WileyTitle/productCd-1119975085,descCd-buy.html">HTML5 Games: Creating Fun with HTML5, CSS3, and WebGL</a> by Jacob Seidelin</li>
+</ul>
+</body>
+</html>
