@@ -17,13 +17,13 @@ $(document).ready(() => {
 
     $("#numberToMatch").text(randomNumber);
 
-    var blueGem = Math.floor(Math.random() * (13 - 1)) + 1;
+    var blueGem = Math.floor(Math.random() * (12));
     console.log(blueGem);
-  var greenGem = Math.floor(Math.random() * (13 - 1)) + 1;
+  var greenGem = Math.floor(Math.random() * (12));
     console.log(greenGem);
-  var redGem = Math.floor(Math.random () *(13 - 1)) + 1;
+  var redGem = Math.floor(Math.random () *(12));
     console.log(redGem);
-  var yellowGem = Math.floor(Math.random () * (13 -1)) + 1;
+  var yellowGem = Math.floor(Math.random () * (12));
     console.log(yellowGem);
 
 
@@ -34,14 +34,17 @@ $(document).ready(() => {
             - 19)) + 19;
             playerCounter = 0;
             $("#numberToMatch").text(randomNumber);
-            var blueGem = Math.floor(Math.random() * (13 - 1)) + 1;
-            console.log(blueGem);
-          var greenGem = Math.floor(Math.random() * (13 - 1)) + 1;
-            console.log(greenGem);
-          var redGem = Math.floor(Math.random () *(13 - 1)) + 1;
+            var redGem = Math.floor(Math.random() * (12));
             console.log(redGem);
-          var yellowGem = Math.floor(Math.random () * (13 -1)) + 1;
+                
+            
+
+          var yellowGem = Math.floor(Math.random() * (12));
             console.log(yellowGem);
+          var greenGem = Math.floor(Math.random () * (12));
+            console.log(greenGem);
+          var blueGem = Math.floor(Math.random () * (12));
+            console.log(blueGem);
 
     }
 
@@ -57,6 +60,7 @@ $(document).ready(() => {
         // alert("You WON!!");
         $("#result").text("YOU WON!!");
             reset();
+            console.log(redGem);
     }
     else if (playerCounter > randomNumber) {
         lose++;
