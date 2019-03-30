@@ -1,5 +1,5 @@
 body {
-    background-image: url("gembg.jpg");
+    /* background-image: url("gembg.jpg"); */
     background-repeat: no-repeat;
 }
 
@@ -12,19 +12,32 @@ body {
 .container {
     background-color: black;
 }
-
+/* 
 .gems {
     margin: 10px 15px;
-  
-}
+    border: 2px solid green;
+} */
 
-#randomNumber {
+#colTwo {
     background-color: chartreuse;
     color: black;
+    padding: 50px 0px 50px 0;
+ 
 }
 
 #winsLoses {
     background-color: salmon;
     color:  black;
+}
+
+#result {
+    background-color: salmon;
+    color:  black;
+}
+
+#colSix {
+    padding: 50px 0px 40px 0;
+    background-color: blue;
+    color: black;
 }
 
